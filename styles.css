@@ -1,0 +1,29 @@
+body {
+    font-family: Arial, sans-serif;
+    padding: 10px;
+    width: 250px;
+}
+
+h1 {
+    font-size: 18px;
+    margin-bottom: 10px;
+}
+
+#languageSelect {
+    width: 100%;
+    margin-bottom: 10px;
+}
+
+#bibleVerses {
+    margin-bottom: 10px;
+}
+
+#markAsRead {
+    width: 100%;
+}
+
+#readStatus {
+    margin-top: 10px;
+    font-size: 12px;
+    color: green;
+}
