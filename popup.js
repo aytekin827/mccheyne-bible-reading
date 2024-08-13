@@ -2563,18 +2563,38 @@ const bibleReadingPlan = {
   }
 }
 
+function splitPassage(passage) {
+  if (!passage) return null;
+  const parts = passage.split(" ");
+  const book = parts.slice(0, -1).join(" "); // 마지막 요소를 제외한 부분이 성경책 약어
+  const chapter = parts[parts.length - 1]; // 마지막 요소가 장수
+  return { book, chapter };
+}
+
+function transformReadingPlan(readingPlan) {
+  const transformedPlan = {};
+
+  for (const date in readingPlan) {
+    transformedPlan[date] = {};
+
+    for (const passageKey in readingPlan[date]) {
+      const passage = readingPlan[date][passageKey];
+      transformedPlan[date][passageKey] = splitPassage(passage);
+    }
+  }
+
+  return transformedPlan;
+}
+
+const transformedBibleReadingPlan = transformReadingPlan(bibleReadingPlan);
+
 document.addEventListener('DOMContentLoaded', function () {
-  const languageSelect = document.getElementById('languageSelect');
-  const bibleVersesDiv = document.getElementById('bibleVerses');
   const markAsReadButton = document.getElementById('markAsRead');
   const readStatusDiv = document.getElementById('readStatus');
+  const passages = ['Passage1','Passage2','Passage3','Passage4','Passage5']
 
   const today = new Date();
   const todayKey = today.toISOString().slice(5, 10); // MM-DD 형식
-
-  // localStorage에서 언어 설정 불러오기 또는 기본값은 영어
-  const savedLanguage = localStorage.getItem('selectedLanguage') || 'en';
-  languageSelect.value = savedLanguage;
 
   // 성경 구절 API 호출
   async function fetchBibleVerse(passage) {
@@ -2583,40 +2603,26 @@ document.addEventListener('DOMContentLoaded', function () {
     return data.verse || 'Verse not found';
   }
 
+  // 오늘 읽어야할 쳅터를 팝업에 표시하기
+  function loadTodayChapter() {
+
+    const todayChapter = transformedBibleReadingPlan[todayKey]
+    bibleVerses.innerHTML = passages
+    .filter(passage => todayChapter[passage] !== null && todayChapter[passage] !== undefined)
+    .map(passage => `<li>[${todayChapter[passage]['book']}] chapter ${todayChapter[passage]['chapter']}</li>`)
+    .join('');
+  }
+
   // 구절들을 불러와서 팝업에 표시하기 (localStorage 확인 후 API 호출)
   async function loadVerses() {
-    const storageKey = `verses_${todayKey}_${languageSelect.value}`;
-    let versesData = JSON.parse(localStorage.getItem(storageKey));
-
-    if (!versesData) {
-      const passages = bibleReadingPlan[todayKey];
-      if (!passages) {
-        bibleVersesDiv.innerHTML = '<p>No passages available for today.</p>';
-        return;
-      }
-
-      const versesPromises = Object.values(passages)
-        .filter(passage => passage !== null)
-        .map(passage => fetchBibleVerse(passage));
-
-      const verses = await Promise.all(versesPromises);
-      versesData = verses.map((verse, index) => ({
-        passage: Object.keys(passages)[index],
-        text: verse
-      }));
-
-      // Fetch한 구절을 localStorage에 저장
-      localStorage.setItem(storageKey, JSON.stringify(versesData));
-    }
-
-    // localStorage에서 불러온 구절들을 표시
-    bibleVersesDiv.innerHTML = versesData.map(verseObj => `<p>${verseObj.passage}: ${verseObj.text}</p>`).join('');
+    loadTodayChapter()
   }
 
   // 읽음으로 표시하기
   markAsReadButton.addEventListener('click', function () {
     localStorage.setItem(`read_${todayKey}`, 'true');
     updateReadStatus();
+    updateYearlyStats();
   });
 
   // 읽음 상태 업데이트
@@ -2625,18 +2631,28 @@ document.addEventListener('DOMContentLoaded', function () {
     readStatusDiv.textContent = isRead ? "You've read today's verses." : '';
   }
 
+  // 연간 통계 업데이트
+  function updateYearlyStats() {
+    const totalDays = 365;
+    let daysRead = 0;
+
+    Object.keys(bibleReadingPlan).forEach(dateKey => {
+      if (localStorage.getItem(`read_${dateKey}`) === 'true') {
+        daysRead++;
+      }
+    });
+
+    const percentageRead = ((daysRead / totalDays) * 100).toFixed(2);
+    statsText.textContent = `You've read ${daysRead} out of ${totalDays} days (${percentageRead}%) this year.`;
+  }
+
   // 1월 1일에 기록 초기화
   if (todayKey === '01-01') {
     localStorage.clear();
   }
 
-  // 언어 선택
-  languageSelect.addEventListener('change', function () {
-    localStorage.setItem('selectedLanguage', languageSelect.value);
-    loadVerses();
-  });
-
   // 초기 로드
   loadVerses();
   updateReadStatus();
+  updateYearlyStats();
 });

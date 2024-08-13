@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "McCheyne Bible Reading(맥체인 성경읽기)",
+  "name": "McCheyne Bible Reading",
   "version": "1.0",
   "action": {
     "default_popup": "popup.html",
