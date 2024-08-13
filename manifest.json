@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
-  "name": "McCheyne Bible Reading Tracker",
-  "version": "1.0",
+  "name": "Bible Reading Tracker",
+  "version": "1.1",
   "action": {
     "default_popup": "popup.html",
     "default_icon": {
