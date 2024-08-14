@@ -2606,7 +2606,7 @@ document.addEventListener('DOMContentLoaded', function () {
     .join('');
   }
 
-  // 구절들을 불러와서 팝업에 표시하기 (localStorage 확인 후 API 호출)
+  // 구절들을 불러와서 팝업에 표시하기
   async function loadVerses() {
     loadTodayChapter()
   }
