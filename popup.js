@@ -2596,13 +2596,6 @@ document.addEventListener('DOMContentLoaded', function () {
   const today = new Date();
   const todayKey = today.toISOString().slice(5, 10); // MM-DD 형식
 
-  // 성경 구절 API 호출
-  async function fetchBibleVerse(passage) {
-    const response = await fetch(`https://api.scripture.api.bible/v1/bibles/${bibleVersionID}/verses/${bibleVerseID}?include-chapter-numbers=false&include-verse-numbers=false`);
-    const data = await response.json();
-    return data.verse || 'Verse not found';
-  }
-
   // 오늘 읽어야할 쳅터를 팝업에 표시하기
   function loadTodayChapter() {
 
